@@ -7,7 +7,7 @@ to analyse business sales data across customers, products, markets, and time per
 - Microsoft Power BI Desktop
 - Power Query (M Language) — ETL & Data Transformation
 - DAX (Data Analysis Expressions) — KPI Calculations
-- SQL Server — Data Source
+- SQL Server / MySQL — Data Source
 - Microsoft Excel — Supporting Data Source
 
 ## 📊 Dashboard Pages
@@ -27,22 +27,89 @@ to analyse business sales data across customers, products, markets, and time per
 - Interactive slicers, drill-through, and bookmark navigation
 - Cross-page synchronized filters (Customer Type, Year, Month)
 
+## 🗄️ Database Setup
+
+1. Install MySQL on your local computer:
+   https://www.youtube.com/watch?v=WuBcTJnIuzo
+
+2. Download `db_dump.sql` from this repository and import it as per the instructions in the video above.
+
+## 🔍 Data Analysis Using SQL
+
+```sql
+-- Show all customer records
+SELECT * FROM customers;
+
+-- Show total number of customers
+SELECT count(*) FROM customers;
+
+-- Show transactions for Chennai market (market code: Mark001)
+SELECT * FROM transactions WHERE market_code='Mark001';
+
+-- Show distinct product codes sold in Chennai
+SELECT DISTINCT product_code FROM transactions WHERE market_code='Mark001';
+
+-- Show transactions in USD
+SELECT * FROM transactions WHERE currency='USD';
+
+-- Show transactions in 2020 joined with date table
+SELECT transactions.*, date.*
+FROM transactions
+INNER JOIN date ON transactions.order_date = date.date
+WHERE date.year = 2020;
+
+-- Show total revenue in 2020
+SELECT SUM(transactions.sales_amount)
+FROM transactions
+INNER JOIN date ON transactions.order_date = date.date
+WHERE date.year = 2020
+AND (transactions.currency = 'INR\r' OR transactions.currency = 'USD\r');
+
+-- Show total revenue in January 2020
+SELECT SUM(transactions.sales_amount)
+FROM transactions
+INNER JOIN date ON transactions.order_date = date.date
+WHERE date.year = 2020
+AND date.month_name = 'January'
+AND (transactions.currency = 'INR\r' OR transactions.currency = 'USD\r');
+
+-- Show total revenue in 2020 for Chennai
+SELECT SUM(transactions.sales_amount)
+FROM transactions
+INNER JOIN date ON transactions.order_date = date.date
+WHERE date.year = 2020
+AND transactions.market_code = 'Mark001';
+```
+
+## ⚡ Data Transformation — Power Query
+
+Currency normalization formula (USD to INR conversion):
+
+```
+= Table.AddColumn(#"Filtered Rows", "norm_amount", each if [currency] = "USD" 
+or [currency] = "USD#(cr)" then [sales_amount]*75 else [sales_amount], type any)
+```
+
 ## 📸 Screenshots
+<!-- Add your dashboard screenshots here -->
 
 ## 🚀 How to Use
 1. Clone or download the repository
-2. Open the `.pbix` file in Power BI Desktop
-3. Update the SQL Server connection string to your local instance
-4. Refresh data and explore the dashboard
+2. Set up MySQL and import `db_dump.sql`
+3. Open the `.pbix` file in Power BI Desktop
+4. Update the database connection to your local instance
+5. Refresh data and explore the dashboard
 
 ## 📁 Project Structure
+```
 ├── dashboard/
 │   └── SalesInsightsDashboard.pbix
 ├── screenshots/
 │   └── (dashboard page images)
 ├── data/
-│   └── (sample Excel files if any)
+│   └── db_dump.sql
 └── README.md
+```
 
 ## 🏢 Developed During
 GTU Internship 2026 — PS Infotech, Pune
